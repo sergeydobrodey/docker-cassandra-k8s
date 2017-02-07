@@ -17,6 +17,7 @@ FROM gcr.io/google_containers/ubuntu-slim:0.6
 ARG BUILD_DATE
 ARG VCS_REF
 ARG CASSANDRA_VERSION
+ARG DEV_CONTAINER
 
 LABEL \
     org.label-schema.build-date=$BUILD_DATE \
@@ -51,13 +52,14 @@ RUN set -e && echo 'debconf debconf/frontend select Noninteractive' | debconf-se
     ) \
     && wget -q -O - ${mirror_url}/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz \
         | tar -xzf - -C /usr/local \
-    && wget -q -O - https://github.com/Yelp/dumb-init/releases/download/v${DI_VERSION}/dumb-init_${DI_VERSION}_amd64 > /sbin/dumb-init \ 
+    && wget -q -O - https://github.com/Yelp/dumb-init/releases/download/v${DI_VERSION}/dumb-init_${DI_VERSION}_amd64 > /sbin/dumb-init \
     && echo "$DI_SHA  /sbin/dumb-init" | sha256sum -c - \
     && chmod +x /sbin/dumb-init \
     && mkdir -p /cassandra_data/data \
     && mkdir -p /etc/cassandra \
     && mv /logback.xml /cassandra.yaml /jvm.options /etc/cassandra/ \
     && adduser --disabled-password --no-create-home --gecos '' --disabled-login cassandra \
+    && if [ -n "$DEV_CONTAINER" ]; then apt-get -y --no-install-recommends install python; fi \
     && apt-get -y purge wget localepurge \
     && apt-get autoremove \
     && apt-get clean \
@@ -112,7 +114,7 @@ RUN set -e && echo 'debconf debconf/frontend select Noninteractive' | debconf-se
         /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/nashorn.jar \
         /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/oblique-fonts \
         /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/plugin.jar \
-	/usr/lib/jvm/java-8-openjdk-amd64/man 
+	/usr/lib/jvm/java-8-openjdk-amd64/man
 
 VOLUME ["/$CASSANDRA_DATA"]
 
