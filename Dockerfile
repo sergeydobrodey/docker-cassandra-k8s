@@ -55,10 +55,12 @@ RUN set -e && echo 'debconf debconf/frontend select Noninteractive' | debconf-se
     && wget -q -O - https://github.com/Yelp/dumb-init/releases/download/v${DI_VERSION}/dumb-init_${DI_VERSION}_amd64 > /sbin/dumb-init \
     && echo "$DI_SHA  /sbin/dumb-init" | sha256sum -c - \
     && chmod +x /sbin/dumb-init \
+    && chmod +x /ready-probe.sh \
     && mkdir -p /cassandra_data/data \
     && mkdir -p /etc/cassandra \
     && mv /logback.xml /cassandra.yaml /jvm.options /etc/cassandra/ \
     && adduser --disabled-password --no-create-home --gecos '' --disabled-login cassandra \
+    && chown cassandra: /ready-probe.sh \
     && if [ -n "$DEV_CONTAINER" ]; then apt-get -y --no-install-recommends install python; fi \
     && apt-get -y purge wget localepurge \
     && apt-get autoremove \
