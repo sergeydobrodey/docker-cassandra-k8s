@@ -58,10 +58,10 @@ RUN set -e && echo 'debconf debconf/frontend select Noninteractive' | debconf-se
     && chmod +x /ready-probe.sh \
     && mkdir -p /cassandra_data/data \
     && mkdir -p /etc/cassandra \
-    && mv /logback.xml /cassandra.yaml /jvm.options /etc/cassandra/ \
+    && mv /logback.xml /cassandra.yaml /jvm.options /cassandra-env.sh /etc/cassandra/ \
     && adduser --disabled-password --no-create-home --gecos '' --disabled-login cassandra \
     && chown cassandra: /ready-probe.sh \
-    && if [ -n "$DEV_CONTAINER" ]; then apt-get -y --no-install-recommends install python; fi \
+    && if [ -n "$DEV_CONTAINER" ]; then apt-get -y --no-install-recommends install python; else rm -rf  $CASSANDRA_HOME/pylib; fi \
     && apt-get -y purge wget localepurge \
     && apt-get autoremove \
     && apt-get clean \
@@ -72,7 +72,6 @@ RUN set -e && echo 'debconf debconf/frontend select Noninteractive' | debconf-se
         $CASSANDRA_HOME/tools/*.yaml \
         $CASSANDRA_HOME/tools/bin/*.bat \
         $CASSANDRA_HOME/bin/*.bat \
-        $CASSANDRA_HOME/pylib \
 	doc \
 	man \
 	info \
